@@ -39,5 +39,5 @@ def preProcess(file):
             
     return 
             
-trainfile = open("primary_wo_noise.csv", 'r')
+trainfile = open("general_wo_noise.csv", 'r')
 preProcess(trainfile)
