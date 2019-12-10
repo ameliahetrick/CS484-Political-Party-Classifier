@@ -13,7 +13,12 @@ from nltk.corpus import stopwords                              # stop words
 from sklearn.metrics.pairwise import cosine_similarity         # cosine similarity
 from scipy.sparse import csr_matrix                            # sparse matrix
 from collections import Counter                                # list counter (most common element)
+import csv
 
+#imports to tokenize/stem
+from nltk import RegexpTokenizer
+from nltk.stem.porter import PorterStemmer
+import re
 
 '''
 Step 0. Read command line arguments.
@@ -47,7 +52,37 @@ print('')
 print('Working...')
 print()
 
+#open training file
+trainfile = open(train, 'r')
 
+#Code to read training file,
+
+#Here's the code from my HW1 that tokenized, stemmed, and rejoined the lines in the file
+#Took the file object, made it into a list of the lines, then tokenizes, stems, and rejoins
+"""def preProcess(file):
+    
+    tokenizer = RegexpTokenizer('\s+', gaps=True)
+    
+    stemmer = PorterStemmer()
+    
+    reviews = list(file)
+    i=0
+    t1 = ""
+    t2 = ""
+    t3 = ""
+    #erase punctuation, tokenize, stem
+    for doc in reviews:
+        t1 = re.sub('[^A-Za-z0-9+-]+', ' ', doc)
+        t2 = tokenizer.tokenize(t1) 
+        t3 = [stemmer.stem(word) for word in t2]
+        reviews[i] = " ".join(t3)
+        i+=1
+
+    return reviews"""
+
+
+
+testfile = open(test, 'r')
 
 '''
 Step 1. 
