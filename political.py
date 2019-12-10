@@ -75,17 +75,17 @@ test = []
 testLables = []
 output = []
 
-# TO DO : REMOVE FIRST ROW OF LABLES IN THIS SECTION
 
 #open train file
 with open(trainFile, 'r') as file:
     csv1 = csv.reader(file, delimiter=',')
     columns = defaultdict(list)
+    next(file)
     for row in csv1:
         for (i,v) in enumerate(row):
             columns[i].append(v)
     train = columns[2]
-print(train[0])
+#print(train[0])
 train = np.array(train)
 print(type(train))
 
@@ -93,16 +93,16 @@ print(type(train))
 with open(trainLabelsFile, 'r') as file:
     trainLabels = file.readlines()
 
-
 #open test file
 with open(testFile, 'r') as file:
     csv2 = csv.reader(file, delimiter=',')
     columns = defaultdict(list)
+    next(file)
     for row in csv2:
         for (i,v) in enumerate(row):
             columns[i].append(v)
     test = columns[2]
-print(test[1])
+#print(test[0])
 test = np.array(test)
 print(type(test))
 
@@ -200,7 +200,7 @@ le = LabelEncoder()
 Y = le.fit_transform(Y)
 Y = Y.reshape(-1,1)
 
-X_train,X_test,Y_train,Y_test = train, trainLabels, test, testLabels
+X_train,X_test,Y_train,Y_test = train, test, trainLabels, testLabels
 
 max_words = 1000
 max_len = 150
@@ -208,7 +208,7 @@ tok = Tokenizer(num_words=max_words)
 tok.fit_on_texts(X_train)
 sequences = tok.texts_to_sequences(X_train)
 sequences_matrix = sequence.pad_sequences(sequences,maxlen=max_len)
-
+print(sequences_matrix)
 
 def RNN():
     inputs = Input(name='inputs',shape=[max_len])
@@ -226,8 +226,19 @@ model = RNN()
 model.summary()
 model.compile(loss='binary_crossentropy',optimizer=RMSprop(),metrics=['accuracy'])
 
-model.fit(sequences_matrix,Y_train,batch_size=128,epochs=10,
-          validation_split=0.2,callbacks=[EarlyStopping(monitor='val_loss',min_delta=0.0001)])
+'''
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
+tk = Tokenizer()
+tk.fit_on_texts(train)
+index_list = tk.texts_to_sequences(train)
+x_train = pad_sequences(index_list, maxlen=max_len)
+'''
+
+#model.fit(sequences_matrix,Y_train,batch_size=128,epochs=10,
+          #validation_split=0.2,callbacks=[EarlyStopping(monitor='val_loss',min_delta=0.0001)])
+model.fit(np.array(sequences_matrix),np.array(Y_train),batch_size=128,epochs=10)
+
 
 test_sequences = tok.texts_to_sequences(X_test)
 test_sequences_matrix = sequence.pad_sequences(test_sequences,maxlen=max_len)
