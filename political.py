@@ -2,7 +2,7 @@
 put our info here
 
 Example run:
-python3 [fill this in]
+python3 political.py primary_wo_noise.csv general_wo_noise.csv out.dat
 
 '''
 
@@ -59,7 +59,7 @@ trainfile = open(train, 'r')
 
 #Here's the code from my HW1 that tokenized, stemmed, and rejoined the lines in the file
 #Took the file object, made it into a list of the lines, then tokenizes, stems, and rejoins
-"""def preProcess(file):
+def preProcess(file):
     
     tokenizer = RegexpTokenizer('\s+', gaps=True)
     
@@ -78,7 +78,7 @@ trainfile = open(train, 'r')
         reviews[i] = " ".join(t3)
         i+=1
 
-    return reviews"""
+    return reviews
 
 
 
