@@ -6,10 +6,11 @@ Created: November 2019
 Updated: December 10 2019
 
 Example run:
-python3 political.py primary_stemmed.csv primaryClassified.dat general_stemmed.csv generalClassified.dat out.dat
+python3 political.py primary_stemmed.csv primaryClassified.txt general_stemmed.csv generalClassified.txt out.txt
 
 Majority of code outline taken from:
 https://www.kaggle.com/kredy10/simple-lstm-for-text-classification
+https://www.datatechnotes.com/2019/06/text-classification-example-with-keras.html
 '''
 
 import sys                                                     # system args (cli)
@@ -85,9 +86,8 @@ with open(trainFile, 'r') as file:
         for (i,v) in enumerate(row):
             columns[i].append(v)
     train = columns[2]
-#print(train[0])
 train = np.array(train)
-print(type(train))
+print(train[0], type(train[0]))
 
 #open train labels file
 with open(trainLabelsFile, 'r') as file:
@@ -102,9 +102,7 @@ with open(testFile, 'r') as file:
         for (i,v) in enumerate(row):
             columns[i].append(v)
     test = columns[2]
-#print(test[0])
 test = np.array(test)
-print(type(test))
 
 
 #open test labels file
@@ -114,7 +112,6 @@ with open(testLabelsFile, 'r') as file:
 
 
 
-print(train.shape)
 #sys.exit(0)
 
 
@@ -179,6 +176,16 @@ from keras.preprocessing.text import Tokenizer
 from keras.preprocessing import sequence
 from keras.utils import to_categorical
 from keras.callbacks import EarlyStopping
+
+
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
+from keras.models import Sequential
+from keras import layers
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix
+import pandas as pd
+
 #matplotlib inline
 
 df = pd.read_csv(trainFile,delimiter=',',encoding='latin-1')
@@ -193,17 +200,19 @@ df.info()
 
 #Labels = pd.DataFrame({'trainLabels': trainLabels})
 
-#print(df.Text)
+'''
 X = df.Text
 Y = trainLabels
 le = LabelEncoder()
 Y = le.fit_transform(Y)
 Y = Y.reshape(-1,1)
+'''
 
 X_train,X_test,Y_train,Y_test = train, test, trainLabels, testLabels
 X_train,X_test,Y_train,Y_test = np.array(X_train), np.array(X_test), np.array(Y_train), np.array(Y_test)
 
-max_words = 1000
+#max_words = 1000
+max_words = 500
 max_len = 150
 tok = Tokenizer(num_words=max_words)
 tok.fit_on_texts(X_train)
@@ -213,7 +222,7 @@ sequences_matrix = np.array(sequences_matrix)
 print(sequences_matrix)
 
 def RNN():
-    inputs = Input(name='inputs',shape=[max_len])
+    '''inputs = Input(name='inputs',shape=[max_len])
     layer = Embedding(max_words,50,input_length=max_len)(inputs)
     layer = LSTM(64)(layer)
     layer = Dense(256,name='FC1')(layer)
@@ -221,15 +230,28 @@ def RNN():
     layer = Dropout(0.5)(layer)
     layer = Dense(1,name='out_layer')(layer)
     layer = Activation('sigmoid')(layer)
-    model = Model(inputs=inputs,outputs=layer)
+    model = Model(inputs=inputs,outputs=layer)'''
+
+    vocab_size=len(tok.word_index)+1
+    embedding_dim=50
+    model=Sequential()
+    model.add(layers.Embedding(input_dim=vocab_size, output_dim=embedding_dim, input_length=max_len))
+    model.add(layers.LSTM(units=50,return_sequences=True))
+    model.add(layers.LSTM(units=10))
+    model.add(layers.Dropout(0.5))
+    model.add(layers.Dense(8))
+    model.add(layers.Dense(1, activation="sigmoid"))
+    model.compile(optimizer="adam", loss="binary_crossentropy", 
+         metrics=['accuracy'])
     return model
 
 model = RNN()
 model.summary()
 model.compile(loss='binary_crossentropy',optimizer=RMSprop(),metrics=['accuracy'])
+#model.compile(loss='categorical_crossentropy',optimizer=RMSprop(),metrics=['accuracy'])
 
 
-model.fit(sequences_matrix,Y_train,batch_size=128,epochs=10,callbacks=[EarlyStopping(monitor='val_loss',min_delta=0.0001)])
+model.fit(sequences_matrix,Y_train,batch_size=32,epochs=1)#,callbacks=[EarlyStopping(monitor='val_loss',min_delta=0.0001)])
 
 
 test_sequences = tok.texts_to_sequences(X_test)
@@ -241,8 +263,13 @@ accr = model.evaluate(test_sequences_matrix,Y_test)
 
 print('Test set\n  Loss: {:0.3f}\n  Accuracy: {:0.3f}'.format(accr[0],accr[1]))
 
+output = model.predict(test_sequences_matrix)
+output[output>0.5]='+1' 
+output[output<=0.5]='-1'
+print(output[0:10])
 
-
+with open(outputFile, 'w') as file:
+    file.write('\n'.join(map(str, output)))
 
 
 
