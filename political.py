@@ -9,7 +9,7 @@ Example run:
 python3 political.py primary_stemmed.csv primaryClassified.dat general_stemmed.csv generalClassified.dat out.dat
 
 Majority of code outline taken from:
-
+https://www.kaggle.com/kredy10/simple-lstm-for-text-classification
 '''
 
 import sys                                                     # system args (cli)
@@ -165,7 +165,7 @@ model.fit(train, trainLabels, epochs = 100, batch_size = 32)
 '''
 
 
-#https://www.kaggle.com/kredy10/simple-lstm-for-text-classification
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -201,6 +201,7 @@ Y = le.fit_transform(Y)
 Y = Y.reshape(-1,1)
 
 X_train,X_test,Y_train,Y_test = train, test, trainLabels, testLabels
+X_train,X_test,Y_train,Y_test = np.array(X_train), np.array(X_test), np.array(Y_train), np.array(Y_test)
 
 max_words = 1000
 max_len = 150
@@ -208,6 +209,7 @@ tok = Tokenizer(num_words=max_words)
 tok.fit_on_texts(X_train)
 sequences = tok.texts_to_sequences(X_train)
 sequences_matrix = sequence.pad_sequences(sequences,maxlen=max_len)
+sequences_matrix = np.array(sequences_matrix)
 print(sequences_matrix)
 
 def RNN():
@@ -226,22 +228,13 @@ model = RNN()
 model.summary()
 model.compile(loss='binary_crossentropy',optimizer=RMSprop(),metrics=['accuracy'])
 
-'''
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
-tk = Tokenizer()
-tk.fit_on_texts(train)
-index_list = tk.texts_to_sequences(train)
-x_train = pad_sequences(index_list, maxlen=max_len)
-'''
 
-#model.fit(sequences_matrix,Y_train,batch_size=128,epochs=10,
-          #validation_split=0.2,callbacks=[EarlyStopping(monitor='val_loss',min_delta=0.0001)])
-model.fit(np.array(sequences_matrix),np.array(Y_train),batch_size=128,epochs=10)
+model.fit(sequences_matrix,Y_train,batch_size=128,epochs=10,callbacks=[EarlyStopping(monitor='val_loss',min_delta=0.0001)])
 
 
 test_sequences = tok.texts_to_sequences(X_test)
 test_sequences_matrix = sequence.pad_sequences(test_sequences,maxlen=max_len)
+test_sequences_matrix = np.array(test_sequences_matrix)
 
 accr = model.evaluate(test_sequences_matrix,Y_test)
 
