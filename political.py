@@ -2,7 +2,7 @@
 put our info here
 
 Example run:
-python3 [fill this in]
+python3 political.py primary_wo_noise.csv general_wo_noise.csv out.dat
 
 '''
 
@@ -29,38 +29,45 @@ Looking for:
   3) output file (test file's classification labels)
 '''
 
-train = ''
-test = ''
-output = ''
+trainFile = ''
+trainLabelsFile = ''
+testFile = ''
+testLablesFile = ''
+outputFile = ''
 
 # all cli components should be present and in order, otherwise give mssg and exit
-if (len(sys.argv) == 4):
-    train = sys.argv[1]
-    test = sys.argv[2]
-    output = sys.argv[3]
+if (len(sys.argv) == 6):
+    trainFile = sys.argv[1]
+    trainLabelsFile = sys.argv[2]
+    testFile = sys.argv[3]
+    testLabelsFile = sys.argv[4]
+    outputFile = sys.argv[5]
 else:
     print('Please enter acceptable command line arguments:')
-    print('\t[program] [train in] [test in] [labels out]')
+    print('\t[program] [train in] [train labels] [test in] [test labels] [predicted labels out]')
     sys.exit(0)
 
 # print confirmations of command line inputs
 print('')
-print('Train:', train)
-print('Test:', test)
-print('Output:', output)
+print('Train:', trainFile)
+print('Train Labels:', trainLabelsFile)
+print('Test:', testFile)
+print('Test Labels:', testLabelsFile)
+print('Output:', outputFile)
 print('')
 print('Working...')
 print()
 
 #open training file
-trainfile = open(train, 'r')
+with open(trainFile, 'r'):
+    print("yay")
 
 #Code to read training file,
 
 
 
 
-testfile = open(test, 'r')
+#testfile = open(test, 'r')
 
 '''
 Step 1. 
@@ -91,6 +98,46 @@ Step 3.
 
 
 print('Step 3 of 3. Program run done! See output file.')
+
+
+
+
+'''
+keras
+'''
+
+
+'''
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import LSTM
+from keras.layers import Dropout
+
+model = Sequential()
+
+model.add(LSTM(units=50, return_sequences=True, input_shape=(features_set.shape[1], 1)))
+
+model.add(Dropout(0.2))
+
+model.add(LSTM(units=50, return_sequences=True))
+model.add(Dropout(0.2))
+
+model.add(LSTM(units=50, return_sequences=True))
+model.add(Dropout(0.2))
+
+model.add(LSTM(units=50))
+model.add(Dropout(0.2))
+
+model.add(Dense(units = 1))
+
+model.compile(optimizer = 'adam', loss = 'mean_squared_error')
+
+model.fit(features_set, labels, epochs = 100, batch_size = 32)
+'''
+
+
+
+
 
 
 
