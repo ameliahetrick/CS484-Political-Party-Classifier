@@ -17,6 +17,8 @@ https://pythonprogramming.net/recurrent-neural-network-rnn-lstm-machine-learning
 
 https://blog.quantinsti.com/rnn-lstm-gru-trading/?utm_campaign=News&utm_medium=Community&utm_source=DataCamp.com
 
+https://data-flair.training/blogs/tensorflow-recurrent-neural-network/
+
 
 Tasks:
 1. Pre-process text
