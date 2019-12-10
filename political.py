@@ -13,7 +13,12 @@ from nltk.corpus import stopwords                              # stop words
 from sklearn.metrics.pairwise import cosine_similarity         # cosine similarity
 from scipy.sparse import csr_matrix                            # sparse matrix
 from collections import Counter                                # list counter (most common element)
+import csv
 
+#imports to tokenize/stem
+from nltk import RegexpTokenizer
+from nltk.stem.porter import PorterStemmer
+import re
 
 '''
 Step 0. Read command line arguments.
@@ -47,7 +52,15 @@ print('')
 print('Working...')
 print()
 
+#open training file
+trainfile = open(train, 'r')
 
+#Code to read training file,
+
+
+
+
+testfile = open(test, 'r')
 
 '''
 Step 1. 
