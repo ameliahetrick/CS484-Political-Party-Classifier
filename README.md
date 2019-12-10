@@ -8,6 +8,7 @@ https://stackabuse.com/time-series-analysis-with-lstm-using-pythons-keras-librar
 //keras implemenation of LSTM classifier
 
 https://keras.io/layers/recurrent/
+https://keras.io/examples/imdb_lstm/
 
 //nonkeras
 
