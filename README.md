@@ -11,6 +11,8 @@ https://keras.io/layers/recurrent/
 //nonkeras
 https://iamtrask.github.io/2015/11/15/anyone-can-code-lstm/
 
+https://pythonprogramming.net/recurrent-neural-network-rnn-lstm-machine-learning-tutorial/
+
 
 Tasks:
 1. Pre-process text
