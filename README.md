@@ -9,6 +9,7 @@ https://stackabuse.com/time-series-analysis-with-lstm-using-pythons-keras-librar
 
 https://keras.io/layers/recurrent/
 https://keras.io/examples/imdb_lstm/
+https://machinelearningmastery.com/sequence-classification-lstm-recurrent-neural-networks-python-keras/
 
 //nonkeras
 
