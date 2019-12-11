@@ -11,6 +11,8 @@ python3 political.py primary_stemmed.csv primaryClassified.txt general_stemmed.c
 Majority of code outline taken from:
 https://www.kaggle.com/kredy10/simple-lstm-for-text-classification
 https://www.datatechnotes.com/2019/06/text-classification-example-with-keras.html
+
+https://keras.io/ for extras
 '''
 
 import sys                                                     # system args (cli)
@@ -87,7 +89,7 @@ with open(trainFile, 'r') as file:
             columns[i].append(v)
     train = columns[2]
 train = np.array(train)
-print(train[0], type(train[0]))
+#print(train[0], type(train[0]))
 
 #open train labels file
 with open(trainLabelsFile, 'r') as file:
@@ -109,6 +111,8 @@ test = np.array(test)
 with open(testLabelsFile, 'r') as file:
     testLabels = file.readlines()
 
+for el in range(len(testLabels)):
+    testLabels[el] = int(testLabels[el])
 
 
 
@@ -264,14 +268,34 @@ accr = model.evaluate(test_sequences_matrix,Y_test)
 print('Test set\n  Loss: {:0.3f}\n  Accuracy: {:0.3f}'.format(accr[0],accr[1]))
 
 output = model.predict(test_sequences_matrix)
-output[output>0.5]='+1' 
-output[output<=0.5]='-1'
+output[output>0.5]=1
+output[output<=0.5]=0
+output = output.tolist()
+#list(output)
 print(output[0:10])
 
+
+output2 = []
+for el in range(len(output)):
+    output2.append(int(output[el][0]))
+print(output2[0:10])
+
+print(type(testLabels[0]), type(output2[0]))
+from sklearn.metrics import accuracy_score
+print(accuracy_score(testLabels, output2))
+
+
+
+# note to selves: get rid of output and change to putput2 V
+
 with open(outputFile, 'w') as file:
-    file.write('\n'.join(map(str, output)))
-
-
+    file.write('\n'.join(map(str, output2)))
+'''results = open(outputFile, 'w')
+i=0
+for val in output:
+    results.write(str(int(output[i][0]))+'\n')
+    i+=1
+'''
 
 
 
