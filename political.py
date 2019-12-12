@@ -126,16 +126,14 @@ for el in range(len(testLabels)):
     testLabels[el] = int(testLabels[el])
 
 
-
 ''''''
-
 
 
 X_train,X_test,Y_train,Y_test = train, test, trainLabels, testLabels
 
 # set parameters
-max_words = 500
-max_len = 150
+max_words = 1000
+max_len = 300
 
 # create tokenizer
 tok = Tokenizer(num_words=max_words)
@@ -145,6 +143,42 @@ tok.fit_on_texts(X_train)
 sequences = tok.texts_to_sequences(X_train)
 sequences_matrix = sequence.pad_sequences(sequences,maxlen=max_len)
 sequences_matrix = np.array(sequences_matrix)
+
+# update format of input test data to matrix
+test_sequences = tok.texts_to_sequences(X_test)
+test_sequences_matrix = sequence.pad_sequences(test_sequences,maxlen=max_len)
+test_sequences_matrix = np.array(test_sequences_matrix)
+
+
+''''''
+# baseline neural network: MLP
+"""
+from sklearn.neural_network import MLPClassifier 
+X = sequences_matrix
+y = Y_train
+
+model = MLPClassifier()
+model = model.fit(X, y)
+
+output = model.predict(test_sequences_matrix)
+
+for el in range(len(output)):
+    if output[el] == '1\n':
+        output[el] = 1
+    output[el] = int(output[el])
+
+output = [int(i) for i in output]
+
+output = np.array(output)
+testLabels = np.array(testLabels)
+
+from sklearn.metrics import accuracy_score
+print(accuracy_score(testLabels, output))
+
+sys.exit(0)
+"""
+''''''
+
 
 # create sequential model and add layers
 vocab_size=len(tok.word_index)+1
@@ -163,16 +197,15 @@ model.compile(optimizer=RMSprop(), loss="binary_crossentropy", metrics=['accurac
 model.summary()
 
 # fit model to train labels
-model.fit(sequences_matrix,Y_train,batch_size=32,epochs=1)
+model.fit(sequences_matrix,Y_train,batch_size=64,epochs=5)
 
-# update format of input test data to matrix
-test_sequences = tok.texts_to_sequences(X_test)
-test_sequences_matrix = sequence.pad_sequences(test_sequences,maxlen=max_len)
-test_sequences_matrix = np.array(test_sequences_matrix)
+
 
 
 
 ''''''
+
+
 
 
 # print out accuracy/loss results
