@@ -1,35 +1,38 @@
 '''
-James Edwards
-Amelia Hetrick
+James Edwards  | jedwar30@gmu.edu
+Amelia Hetrick | ahetric@gmu.edu
 
 Created: November 2019
-Updated: December 10 2019
+Updated: December 11 2019
 
 Example run:
+[program] [train in] [train labels in] [test in] [test labels in] [predicted labels out]
 python3 political.py primary_stemmed.csv primaryClassified.txt general_stemmed.csv generalClassified.txt out.txt
 
 Majority of code outline taken from:
 https://www.kaggle.com/kredy10/simple-lstm-for-text-classification
+
+Sequential model adapted from:
 https://www.datatechnotes.com/2019/06/text-classification-example-with-keras.html
 
-https://keras.io/ for extras
+Keras documentation:
+https://keras.io/
 '''
 
-import sys                                                     # system args (cli)
-from nltk.stem import *                                        # snowball stemmer
-from sklearn.feature_extraction.text import TfidfVectorizer    # tf x idf vectorizer
-from nltk.corpus import stopwords                              # stop words
-from sklearn.metrics.pairwise import cosine_similarity         # cosine similarity
-from scipy.sparse import csr_matrix                            # sparse matrix
-from collections import Counter                                # list counter (most common element)
+import sys
 import csv
 from collections import defaultdict
 import numpy as np
+from keras.preprocessing.text import Tokenizer
+from keras.models import Model
+from keras.layers import LSTM, Activation, Dense, Dropout, Input, Embedding
+from keras.optimizers import RMSprop
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing import sequence
+from keras.models import Sequential
+from keras import layers
 
-#imports to tokenize/stem
-from nltk import RegexpTokenizer
-from nltk.stem.porter import PorterStemmer
-import re
+
 
 '''
 Read command line arguments.
@@ -72,6 +75,11 @@ print('Working...')
 print()
 
 
+
+''''''
+
+
+# create lists to hold data
 train= []
 trainLabels = []
 test = []
@@ -79,7 +87,7 @@ testLables = []
 output = []
 
 
-#open train file
+# open train file
 with open(trainFile, 'r') as file:
     csv1 = csv.reader(file, delimiter=',')
     columns = defaultdict(list)
@@ -88,14 +96,12 @@ with open(trainFile, 'r') as file:
         for (i,v) in enumerate(row):
             columns[i].append(v)
     train = columns[2]
-train = np.array(train)
-#print(train[0], type(train[0]))
 
-#open train labels file
+# open train labels file
 with open(trainLabelsFile, 'r') as file:
     trainLabels = file.readlines()
 
-#open test file
+# open test file
 with open(testFile, 'r') as file:
     csv2 = csv.reader(file, delimiter=',')
     columns = defaultdict(list)
@@ -104,198 +110,88 @@ with open(testFile, 'r') as file:
         for (i,v) in enumerate(row):
             columns[i].append(v)
     test = columns[2]
-test = np.array(test)
 
-
-#open test labels file
+# open test labels file
 with open(testLabelsFile, 'r') as file:
     testLabels = file.readlines()
 
+
+# convert data and labels to np arrays
+train = np.array(train)
+trainLabels = np.array(trainLabels)
+test = np.array(test)
+
+# convert test labels to integers
 for el in range(len(testLabels)):
     testLabels[el] = int(testLabels[el])
 
 
 
-#sys.exit(0)
+''''''
 
 
-
-
-'''
-keras
-'''
-
-
-'''
-#https://stackabuse.com/time-series-analysis-with-lstm-using-pythons-keras-library/
-from keras.models import Sequential
-from keras.layers import Dense, Embedding
-from keras.layers import LSTM
-from keras.layers import Dropout
-
-model = Sequential()
-
-
-#model.add(LSTM(units=50, return_sequences=True, input_shape=(train.shape, 1)))
-model.add(LSTM(units=50, return_sequences=True, input_shape=(train.shape)))
-#model.add(LSTM(units=50, return_sequences=True, input_dim=(3)))
-#max_talk_len = 500
-#X_train = sequence.pad_sequence(train, maxlen=max_talk_len)
-
-#model.add(Embedding(500, embedding_vecor_length, input_length=max_talk_len))
-
-
-model.add(Dropout(0.2))
-
-model.add(LSTM(units=50, return_sequences=True))
-model.add(Dropout(0.2))
-
-model.add(LSTM(units=50, return_sequences=True))
-model.add(Dropout(0.2))
-
-model.add(LSTM(units=50))
-model.add(Dropout(0.2))
-
-model.add(Dense(1, activation='sigmoid'))
-
-model.compile(optimizer = 'adam', loss = 'mean_squared_error')
-#model.compile(loss='binary_crossentropy', optimizer = 'adam')
-
-model.fit(train, trainLabels, epochs = 100, batch_size = 32)
-#model.fit(X_train, trainLabels, epochs = 100, batch_size = 32)
-'''
-
-
-
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-#import seaborn as sns
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-from keras.models import Model
-from keras.layers import LSTM, Activation, Dense, Dropout, Input, Embedding
-from keras.optimizers import RMSprop
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing import sequence
-from keras.utils import to_categorical
-from keras.callbacks import EarlyStopping
-
-
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
-from keras.models import Sequential
-from keras import layers
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix
-import pandas as pd
-
-#matplotlib inline
-
-df = pd.read_csv(trainFile,delimiter=',',encoding='latin-1')
-df.head()
-
-print('\n')
-
-cols = [0,1,3,4,5,6]
-df.drop(df.columns[cols],axis=1,inplace=True)
-df.head()
-df.info()
-
-#Labels = pd.DataFrame({'trainLabels': trainLabels})
-
-'''
-X = df.Text
-Y = trainLabels
-le = LabelEncoder()
-Y = le.fit_transform(Y)
-Y = Y.reshape(-1,1)
-'''
 
 X_train,X_test,Y_train,Y_test = train, test, trainLabels, testLabels
-X_train,X_test,Y_train,Y_test = np.array(X_train), np.array(X_test), np.array(Y_train), np.array(Y_test)
 
-#max_words = 1000
+# set parameters
 max_words = 500
 max_len = 150
+
+# create tokenizer
 tok = Tokenizer(num_words=max_words)
 tok.fit_on_texts(X_train)
+
+# update format of input train data to matrix
 sequences = tok.texts_to_sequences(X_train)
 sequences_matrix = sequence.pad_sequences(sequences,maxlen=max_len)
 sequences_matrix = np.array(sequences_matrix)
-print(sequences_matrix)
 
-def RNN():
-    '''inputs = Input(name='inputs',shape=[max_len])
-    layer = Embedding(max_words,50,input_length=max_len)(inputs)
-    layer = LSTM(64)(layer)
-    layer = Dense(256,name='FC1')(layer)
-    layer = Activation('relu')(layer)
-    layer = Dropout(0.5)(layer)
-    layer = Dense(1,name='out_layer')(layer)
-    layer = Activation('sigmoid')(layer)
-    model = Model(inputs=inputs,outputs=layer)'''
+# create sequential model and add layers
+vocab_size=len(tok.word_index)+1
+embedding_dim=50
+model=Sequential()
+model.add(layers.Embedding(input_dim=vocab_size, output_dim=embedding_dim, input_length=max_len))
 
-    vocab_size=len(tok.word_index)+1
-    embedding_dim=50
-    model=Sequential()
-    model.add(layers.Embedding(input_dim=vocab_size, output_dim=embedding_dim, input_length=max_len))
-    model.add(layers.LSTM(units=50,return_sequences=True))
-    model.add(layers.LSTM(units=10))
-    model.add(layers.Dropout(0.5))
-    model.add(layers.Dense(8))
-    model.add(layers.Dense(1, activation="sigmoid"))
-    model.compile(optimizer="adam", loss="binary_crossentropy", 
-         metrics=['accuracy'])
-    return model
+model.add(layers.LSTM(units=50,return_sequences=True))
+model.add(layers.LSTM(units=10))
+model.add(layers.Dropout(0.5))
+model.add(layers.Dense(8))
+model.add(layers.Dense(1, activation="sigmoid"))
+    
+model.compile(optimizer=RMSprop(), loss="binary_crossentropy", metrics=['accuracy'])
 
-model = RNN()
 model.summary()
-model.compile(loss='binary_crossentropy',optimizer=RMSprop(),metrics=['accuracy'])
-#model.compile(loss='categorical_crossentropy',optimizer=RMSprop(),metrics=['accuracy'])
 
+# fit model to train labels
+model.fit(sequences_matrix,Y_train,batch_size=32,epochs=1)
 
-model.fit(sequences_matrix,Y_train,batch_size=32,epochs=1)#,callbacks=[EarlyStopping(monitor='val_loss',min_delta=0.0001)])
-
-
+# update format of input test data to matrix
 test_sequences = tok.texts_to_sequences(X_test)
 test_sequences_matrix = sequence.pad_sequences(test_sequences,maxlen=max_len)
 test_sequences_matrix = np.array(test_sequences_matrix)
 
+
+
+''''''
+
+
+# print out accuracy/loss results
 accr = model.evaluate(test_sequences_matrix,Y_test)
-
-
 print('Test set\n  Loss: {:0.3f}\n  Accuracy: {:0.3f}'.format(accr[0],accr[1]))
 
+# binarize results to fall into categories of either 0 or 1
 output = model.predict(test_sequences_matrix)
 output[output>0.5]=1
 output[output<=0.5]=0
 output = output.tolist()
-#list(output)
-print(output[0:10])
 
-
-output2 = []
-for el in range(len(output)):
-    output2.append(int(output[el][0]))
-print(output2[0:10])
-
-print(type(testLabels[0]), type(output2[0]))
-from sklearn.metrics import accuracy_score
-print(accuracy_score(testLabels, output2))
-
-
-
-# note to selves: get rid of output and change to putput2 V
-
-with open(outputFile, 'w') as file:
-    file.write('\n'.join(map(str, output2)))
-'''results = open(outputFile, 'w')
+# write results to output file
+results = open(outputFile, 'w')
 i=0
 for val in output:
     results.write(str(int(output[i][0]))+'\n')
     i+=1
-'''
+
 
 
 
